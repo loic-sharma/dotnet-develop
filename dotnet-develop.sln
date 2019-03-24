@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-develop", "dotnet-develop\dotnet-develop.csproj", "{94507832-DDF8-499F-B28C-5B500A1318BB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{33E27D6F-720E-4C71-A86E-F5727383E9A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorld", "samples\HelloWorld\HelloWorld.csproj", "{122A7E6D-8033-4130-A343-57A886A54505}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{94507832-DDF8-499F-B28C-5B500A1318BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94507832-DDF8-499F-B28C-5B500A1318BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94507832-DDF8-499F-B28C-5B500A1318BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{122A7E6D-8033-4130-A343-57A886A54505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{122A7E6D-8033-4130-A343-57A886A54505}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{122A7E6D-8033-4130-A343-57A886A54505}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{122A7E6D-8033-4130-A343-57A886A54505}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{122A7E6D-8033-4130-A343-57A886A54505} = {33E27D6F-720E-4C71-A86E-F5727383E9A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C5EF76EE-D23A-4401-9B6E-779C23120511}
