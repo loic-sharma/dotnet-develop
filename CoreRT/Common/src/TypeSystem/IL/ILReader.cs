@@ -1,9 +1,15 @@
-﻿using System;
+// https://github.com/dotnet/corert/blob/5e3ccd07b0d787276414315a1c0b38b809ed4b99/src/Common/src/TypeSystem/IL/ILReader.cs
 
-namespace dotnet_develop
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
+using Internal.TypeSystem;
+
+namespace Internal.IL
 {
-    // See: https://github.com/dotnet/corert/blob/master/src/System.Private.Interpreter/src/Internal/Runtime/Interpreter/ILInterpreter.cs
-    public class ILReader
+    internal struct ILReader
     {
         private int _currentOffset;
         private readonly byte[] _ilBytes;

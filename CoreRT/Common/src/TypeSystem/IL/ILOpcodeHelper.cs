@@ -1,7 +1,14 @@
-﻿namespace dotnet_develop
+// See: https://github.com/dotnet/corert/blob/635cf21aca11265ded9d78d216424bd609c052f5/src/Common/src/TypeSystem/IL/ILOpcodeHelper.cs
+
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Debug = System.Diagnostics.Debug;
+
+namespace Internal.IL
 {
-    // See: https://github.com/dotnet/corert/blob/635cf21aca11265ded9d78d216424bd609c052f5/src/Common/src/TypeSystem/IL/ILOpcodeHelper.cs
-    static class ILOpcodeHelper
+    public static class ILOpcodeHelper
     {
         private const byte VariableSize = 0xFF;
         private const byte Invalid = 0xFE;
@@ -13,10 +20,10 @@
         /// </summary>
         public static int GetSize(this ILOpcode opcode)
         {
-            //Debug.Assert((uint)opcode < (uint)s_opcodeSizes.Length);
+            Debug.Assert((uint)opcode < (uint)s_opcodeSizes.Length);
             byte result = s_opcodeSizes[(int)opcode];
-            //Debug.Assert(result != VariableSize);
-            //Debug.Assert(result != Invalid);
+            Debug.Assert(result != VariableSize);
+            Debug.Assert(result != Invalid);
             return result;
         }
 

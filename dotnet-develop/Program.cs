@@ -1,10 +1,13 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
+using Internal.IL;
+using Internal.Runtime.Interpreter;
 
-namespace dotnet_develop
+namespace HotReload
 {
     public class Program
     {

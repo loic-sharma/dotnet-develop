@@ -1,16 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+// https://github.com/dotnet/corert/blob/5e3ccd07b0d787276414315a1c0b38b809ed4b99/src/Common/src/System/Collections/Generic/LowLevelStack.cs
 
-namespace dotnet_develop
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+/*============================================================
+**
+**
+** Private version of Stack<T> for internal System.Private.CoreLib use. This
+** permits sharing more source between BCL and System.Private.CoreLib (as well as the
+** fact that Stack<T> is just a useful class in general.)
+**
+** This does not strive to implement the full api surface area
+** (but any portion it does implement should match the real Stack<T>'s
+** behavior.)
+**
+===========================================================*/
+
+namespace System.Collections.Generic
 {
-    // See: https://github.com/dotnet/corert/blob/master/src/Common/src/System/Collections/Generic/LowLevelStack.cs
-
     // Implements a variable-size Stack that uses an array of objects to store the
     // elements. A Stack has a capacity, which is the allocated length
     // of the internal array. As elements are added to a Stack, the capacity
     // of the Stack is automatically increased as required by reallocating the
     // internal array.
-    // 
+    //
     /// <summary>
     /// LowLevelStack with no interface implementation to minimize both code and data size
     /// Data size is smaller because there will be minimal virtual function table.

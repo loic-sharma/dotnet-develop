@@ -1,7 +1,16 @@
-﻿using System;
-using System.Runtime.InteropServices;
+// https://github.com/dotnet/corert/blob/5e3ccd07b0d787276414315a1c0b38b809ed4b99/src/System.Private.Interpreter/src/Internal/Runtime/Interpreter/StackItem.cs
 
-namespace dotnet_develop
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using Internal.IL;
+using Internal.TypeSystem;
+
+namespace Internal.Runtime.Interpreter
 {
     [StructLayout(LayoutKind.Explicit)]
     internal unsafe struct StackItem
@@ -36,7 +45,7 @@ namespace dotnet_develop
 
         public int AsInt32()
         {
-            //Debug.Assert(_kind == StackValueKind.Int32);
+            Debug.Assert(_kind == StackValueKind.Int32);
             return _int32;
         }
 
@@ -52,7 +61,7 @@ namespace dotnet_develop
 
         public long AsInt64()
         {
-            //Debug.Assert(_kind == StackValueKind.Int64);
+            Debug.Assert(_kind == StackValueKind.Int64);
             return _int64;
         }
 
@@ -68,7 +77,7 @@ namespace dotnet_develop
 
         public IntPtr AsNativeInt()
         {
-            //Debug.Assert(_kind == StackValueKind.NativeInt);
+            Debug.Assert(_kind == StackValueKind.NativeInt);
             return _nativeInt;
         }
 
@@ -84,7 +93,7 @@ namespace dotnet_develop
 
         public double AsDouble()
         {
-            //Debug.Assert(_kind == StackValueKind.Float);
+            Debug.Assert(_kind == StackValueKind.Float);
             return _double;
         }
 
@@ -100,7 +109,7 @@ namespace dotnet_develop
 
         public ValueType AsValueType()
         {
-            //Debug.Assert(_kind == StackValueKind.ValueType);
+            Debug.Assert(_kind == StackValueKind.ValueType);
             return _valueType;
         }
 
@@ -116,7 +125,7 @@ namespace dotnet_develop
 
         public object AsObjectRef()
         {
-            //Debug.Assert(_kind == StackValueKind.ObjRef);
+            Debug.Assert(_kind == StackValueKind.ObjRef);
             return _objref;
         }
 

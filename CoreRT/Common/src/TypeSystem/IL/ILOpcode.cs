@@ -1,7 +1,13 @@
-﻿namespace dotnet_develop
-{
-    // See: https://github.com/dotnet/corert/blob/master/src/Common/src/TypeSystem/IL/ILOpcode.cs
+// https://github.com/dotnet/corert/blob/5e3ccd07b0d787276414315a1c0b38b809ed4b99/src/Common/src/TypeSystem/IL/ILOpcode.cs
 
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
+
+namespace Internal.IL
+{
     /// <summary>
     /// An enumeration of all of the operation codes that are used in the CLI Common Intermediate Language.
     /// </summary>

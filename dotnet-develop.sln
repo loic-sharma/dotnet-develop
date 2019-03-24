@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-develop", "dotnet-develop\dotnet-develop.csproj", "{94507832-DDF8-499F-B28C-5B500A1318BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-develop", "dotnet-develop\dotnet-develop.csproj", "{94507832-DDF8-499F-B28C-5B500A1318BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{33E27D6F-720E-4C71-A86E-F5727383E9A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorld", "samples\HelloWorld\HelloWorld.csproj", "{122A7E6D-8033-4130-A343-57A886A54505}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorld", "samples\HelloWorld\HelloWorld.csproj", "{122A7E6D-8033-4130-A343-57A886A54505}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreRT", "CoreRT\CoreRT.csproj", "{70AB4EDD-A50A-4B7F-A80E-AD920F8CC116}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +25,10 @@ Global
 		{122A7E6D-8033-4130-A343-57A886A54505}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{122A7E6D-8033-4130-A343-57A886A54505}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{122A7E6D-8033-4130-A343-57A886A54505}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70AB4EDD-A50A-4B7F-A80E-AD920F8CC116}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70AB4EDD-A50A-4B7F-A80E-AD920F8CC116}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70AB4EDD-A50A-4B7F-A80E-AD920F8CC116}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70AB4EDD-A50A-4B7F-A80E-AD920F8CC116}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
