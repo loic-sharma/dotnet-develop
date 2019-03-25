@@ -60,7 +60,8 @@ namespace HotReload
 
         public StackItem PopWithValidation()
         {
-            if (!_stack.TryPop(out var stackItem))
+            bool hasStackItem = _stack.TryPop(out StackItem stackItem);
+            if (!hasStackItem)
             {
                 ThrowHelper.ThrowInvalidProgramException();
             }
@@ -70,7 +71,8 @@ namespace HotReload
 
         public StackItem PeekWithValidation()
         {
-            if (!_stack.TryPeek(out var stackItem))
+            bool hasStackItem = _stack.TryPeek(out StackItem stackItem);
+            if (!hasStackItem)
             {
                 ThrowHelper.ThrowInvalidProgramException();
             }
@@ -81,11 +83,11 @@ namespace HotReload
         public void InterpretMethod(ref CallInterceptorArgs callInterceptorArgs)
         {
             _callInterceptorArgs = callInterceptorArgs;
-            var reader = new ILReader(_methodBody.GetILBytes());
+            ILReader reader = new ILReader(_methodBody.GetILBytes());
 
             while (reader.HasNext)
             {
-                var opcode = reader.ReadILOpcode();
+                ILOpcode opcode = reader.ReadILOpcode();
                 switch (opcode)
                 {
                     case ILOpcode.nop:
@@ -169,14 +171,13 @@ namespace HotReload
                         throw new NotImplementedException();
                     case ILOpcode.call:
                         {
-                            var handle = reader.ReadILToken().AsHandle();
+                            Handle handle = reader.ReadILToken().AsHandle();
                             if (handle.Kind != HandleKind.MemberReference)
                             {
                                 ThrowHelper.ThrowInvalidProgramException();
                             }
 
-                            var memberReference = _reader.GetMemberReference((MemberReferenceHandle)handle);
-
+                            MemberReference memberReference = _reader.GetMemberReference((MemberReferenceHandle)handle);
                             if (_reader.GetString(memberReference.Name) == "WriteLine")
                             {
                                 StackItem value = _stack.Pop();
@@ -184,12 +185,14 @@ namespace HotReload
                                 {
                                     case StackValueKind.ObjRef:
                                         Console.WriteLine(value.AsObjectRef());
-                                        break;
+                                        return;
                                     case StackValueKind.Int32:
                                         Console.WriteLine(value.AsInt32());
-                                        break;
+                                        return;
                                 }
                             }
+
+                            throw new NotImplementedException();
                         }
                         break;
                     case ILOpcode.calli:
@@ -334,7 +337,7 @@ namespace HotReload
                         throw new NotImplementedException();
                     case ILOpcode.ldstr:
                         {
-                            var handle = reader.ReadILToken().AsHandle();
+                            Handle handle = reader.ReadILToken().AsHandle();
                             if (handle.Kind != HandleKind.UserString)
                             {
                                 ThrowHelper.ThrowInvalidProgramException();
