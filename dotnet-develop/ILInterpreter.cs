@@ -55,7 +55,7 @@ namespace HotReload
 
         public void SetArgument<T>(int index, T value)
         {
-            //_callInterceptorArgs.ArgumentsAndReturnValue.SetVar<T>(index + 1, value);
+            _callInterceptorArgs.ArgumentsAndReturnValue.SetVar<T>(index + 1, value);
         }
 
         public StackItem PopWithValidation()
