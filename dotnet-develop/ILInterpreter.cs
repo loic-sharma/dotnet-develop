@@ -23,7 +23,7 @@ namespace HotReload
         //private readonly TypeSystemContext _context;
         private readonly LowLevelStack<StackItem> _stack;
 
-        private StackItem[] _locals;
+        private readonly StackItem[] _locals;
 
         private CallInterceptorArgs _callInterceptorArgs;
 
@@ -2176,8 +2176,38 @@ namespace HotReload
                     break;
             }
 
-            /*
             Debug.Assert(length >= 0);
+            _stack.Push(StackItem.FromObjectRef(new object[length]));
+
+            /*
+            TODO
+            // See https://github.com/dotnet/corefx/blob/775347f642ae10badf82bcd0352c9f316093cd6f/src/System.Reflection.MetadataLoadContext/src/System/Reflection/TypeLoading/General/Ecma/EcmaResolver.cs#L59
+            // Seems to be TypeReference if external to currently assembly, otherwise TypeDefinition
+            Handle handle = token.AsHandle();
+            if (handle.Kind != HandleKind.TypeReference)
+            {
+                ThrowHelper.ThrowInvalidProgramException();
+            }
+
+            TypeReference typeReference = _reader.GetTypeReference((TypeReferenceHandle)handle);
+            EntityHandle scope = typeReference.ResolutionScope;
+
+            HandleKind scopeKind = scope.Kind;
+            switch (scopeKind)
+            {
+                case HandleKind.AssemblyReference:
+                    {
+                        var assemblyReferenceHandle = (AssemblyReferenceHandle)scope;
+                        var assemblyReference = _reader.GetAssemblyReference(assemblyReferenceHandle);
+                    }
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }*/
+
+            /*
+            Original:
 
             TypeDesc arrayType = ((TypeDesc)_methodIL.GetObject(token)).MakeArrayType();
 
@@ -2218,6 +2248,38 @@ namespace HotReload
                     break;
             }
 
+            switch (opcode)
+            {
+                case ILOpcode.stelem_i:
+                    array.SetValue(valueItem.AsNativeInt(), index);
+                    break;
+                case ILOpcode.stelem_i1:
+                    array.SetValue((sbyte)valueItem.AsInt32(), index);
+                    break;
+                case ILOpcode.stelem_i2:
+                    array.SetValue((short)valueItem.AsInt32(), index);
+                    break;
+                case ILOpcode.stelem_i4:
+                    array.SetValue(valueItem.AsInt32(), index);
+                    break;
+                case ILOpcode.stelem_i8:
+                    array.SetValue(valueItem.AsInt64(), index);
+                    break;
+                case ILOpcode.stelem_r4:
+                    array.SetValue((float)valueItem.AsDouble(), index);
+                    break;
+                case ILOpcode.stelem_r8:
+                    array.SetValue(valueItem.AsDouble(), index);
+                    break;
+                case ILOpcode.stelem_ref:
+                    array.SetValue(valueItem.AsObjectRef(), index);
+                    break;
+                default:
+                    Debug.Assert(false);
+                    break;
+            }
+
+            // TODO
             /*
             ref byte address = ref RuntimeAugments.GetSzArrayElementAddress(array, index);
 
@@ -2255,7 +2317,6 @@ namespace HotReload
 
         private void InterpretStoreElement(int token)
         {
-            /*
             StackItem valueItem = PopWithValidation();
             StackItem indexItem = PopWithValidation();
             Array array = (Array)PopWithValidation().AsObjectRef();
@@ -2280,6 +2341,12 @@ namespace HotReload
                     break;
             }
 
+            var handle = token.AsHandle();
+
+            // TODO
+            throw new NotImplementedException();
+
+            /*
             TypeDesc elementType = (TypeDesc)_methodIL.GetObject(token);
             ref byte address = ref RuntimeAugments.GetSzArrayElementAddress(array, index);
 
@@ -2339,7 +2406,6 @@ namespace HotReload
 
         private void InterpretLoadElement(ILOpcode opcode)
         {
-            /*
             StackItem indexItem = PopWithValidation();
             Array array = (Array)PopWithValidation().AsObjectRef();
 
@@ -2361,53 +2427,50 @@ namespace HotReload
                     ThrowHelper.ThrowInvalidProgramException();
                     break;
             }
-
-            ref byte address = ref RuntimeAugments.GetSzArrayElementAddress(array, index);
 
             switch (opcode)
             {
                 case ILOpcode.ldelem_i1:
-                    _stack.Push(StackItem.FromInt32(Unsafe.Read<sbyte>(ref address)));
+                    _stack.Push(StackItem.FromInt32((sbyte)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_u1:
-                    _stack.Push(StackItem.FromInt32(Unsafe.Read<byte>(ref address)));
+                    _stack.Push(StackItem.FromInt32((byte)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_i2:
-                    _stack.Push(StackItem.FromInt32(Unsafe.Read<short>(ref address)));
+                    _stack.Push(StackItem.FromInt32((short)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_u2:
-                    _stack.Push(StackItem.FromInt32(Unsafe.Read<ushort>(ref address)));
+                    _stack.Push(StackItem.FromInt32((ushort)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_i4:
-                    _stack.Push(StackItem.FromInt32(Unsafe.Read<int>(ref address)));
+                    _stack.Push(StackItem.FromInt32((int)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_u4:
-                    _stack.Push(StackItem.FromInt32((int)Unsafe.Read<uint>(ref address)));
+                    _stack.Push(StackItem.FromInt32((int)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_i8:
-                    _stack.Push(StackItem.FromInt64(Unsafe.Read<long>(ref address)));
+                    _stack.Push(StackItem.FromInt64((long)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_i:
-                    _stack.Push(StackItem.FromNativeInt(Unsafe.Read<IntPtr>(ref address)));
+                    _stack.Push(StackItem.FromNativeInt((IntPtr)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_r4:
-                    _stack.Push(StackItem.FromDouble(Unsafe.Read<float>(ref address)));
+                    _stack.Push(StackItem.FromDouble((float)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_r8:
-                    _stack.Push(StackItem.FromDouble(Unsafe.Read<double>(ref address)));
+                    _stack.Push(StackItem.FromDouble((double)array.GetValue(index)));
                     break;
                 case ILOpcode.ldelem_ref:
-                    _stack.Push(StackItem.FromObjectRef(Unsafe.Read<object>(ref address)));
+                    _stack.Push(StackItem.FromObjectRef(array.GetValue(index)));
                     break;
                 default:
                     Debug.Assert(false);
                     break;
-            }*/
+            }
         }
 
         private void InterpretLoadElement(int token)
         {
-            /*
             StackItem indexItem = PopWithValidation();
             Array array = (Array)PopWithValidation().AsObjectRef();
 
@@ -2430,6 +2493,10 @@ namespace HotReload
                     break;
             }
 
+            // TODO
+            throw new NotImplementedException();
+
+            /*
             TypeDesc elementType = (TypeDesc)_methodIL.GetObject(token);
             ref byte address = ref RuntimeAugments.GetSzArrayElementAddress(array, index);
 
