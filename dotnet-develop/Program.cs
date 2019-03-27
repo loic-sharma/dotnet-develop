@@ -25,7 +25,7 @@ namespace HotReload
                 var entryPoint = metadataReader.GetMethodDefinition((MethodDefinitionHandle)handle);
                 var entryPointBody = reader.GetMethodBody(entryPoint.RelativeVirtualAddress);
 
-                var interpreter = new ILInterpreter(metadataReader, entryPoint, entryPointBody);
+                var interpreter = new ILInterpreter(reader, metadataReader, entryPoint, entryPointBody);
                 var callInterceptorArgs = default(CallInterceptorArgs);
 
                 interpreter.InterpretMethod(ref callInterceptorArgs);

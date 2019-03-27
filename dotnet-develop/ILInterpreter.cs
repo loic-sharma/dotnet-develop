@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using Internal.IL;
 using Internal.Runtime.CompilerServices;
 using Internal.Runtime.Interpreter;
@@ -17,6 +18,7 @@ namespace HotReload
 {
     internal unsafe class ILInterpreter
     {
+        private readonly PEReader _target;
         private readonly MetadataReader _reader;
         private readonly MethodDefinition _method;
         private readonly MethodBodyBlock _methodBody;
@@ -32,14 +34,16 @@ namespace HotReload
         //public TypeSystemContext TypeSystemContext => _context;
 
         public ILInterpreter(
+            PEReader target,
             MetadataReader reader,
             MethodDefinition method,
             MethodBodyBlock methodBody)
         {
+            _target = target;
             _reader = reader;
             _method = method;
             _methodBody = methodBody;
-            _locals = new StackItem[reader.GetLocals(methodBody)];
+            _locals = new StackItem[reader.GetLocalsCount(methodBody)];
             _stack = new LowLevelStack<StackItem>();
         }
 
@@ -172,25 +176,49 @@ namespace HotReload
                     case ILOpcode.call:
                         {
                             Handle handle = reader.ReadILToken().AsHandle();
-                            if (handle.Kind != HandleKind.MemberReference)
+                            if (handle.Kind != HandleKind.MethodDefinition && handle.Kind != HandleKind.MemberReference)
                             {
                                 ThrowHelper.ThrowInvalidProgramException();
                             }
 
-                            MemberReference memberReference = _reader.GetMemberReference((MemberReferenceHandle)handle);
-                            if (_reader.GetString(memberReference.Name) == "WriteLine")
+                            if (handle.Kind == HandleKind.MethodDefinition)
                             {
-                                StackItem value = _stack.Pop();
-                                switch (value.Kind)
+                                MethodDefinition methodDefinition = _reader.GetMethodDefinition((MethodDefinitionHandle)handle);
+                                MethodBodyBlock methodBody = _target.GetMethodBody(methodDefinition.RelativeVirtualAddress);
+                                MethodSignature<SignatureTypeCode> signature = methodDefinition.DecodeSignature(SignatureTypeProvider.Instance, null);
+
+                                // TODO: Create CallInterceptorArgs with proper variable set size.
+                                var interpreter = new ILInterpreter(_target, _reader, methodDefinition, methodBody);
+                                var callInterceptorArgs2 = default(CallInterceptorArgs);
+
+                                interpreter.InterpretMethod(ref callInterceptorArgs2);
+
+                                if (signature.ReturnType != SignatureTypeCode.Void)
                                 {
-                                    case StackValueKind.ObjRef:
-                                        Console.WriteLine(value.AsObjectRef());
-                                        return;
-                                    case StackValueKind.Int32:
-                                        Console.WriteLine(value.AsInt32());
-                                        return;
+                                    // TODO: put return value (if any) on stack.
+                                    _stack.Push(interpreter.GetArgument<StackItem>(0));
+                                }
+
+                                break;
+                            }
+                            else if (handle.Kind == HandleKind.MemberReference)
+                            {
+                                MemberReference memberReference = _reader.GetMemberReference((MemberReferenceHandle)handle);
+                                if (_reader.GetString(memberReference.Name) == "WriteLine")
+                                {
+                                    StackItem value = _stack.Pop();
+                                    switch (value.Kind)
+                                    {
+                                        case StackValueKind.ObjRef:
+                                            Console.WriteLine(value.AsObjectRef());
+                                            return;
+                                        case StackValueKind.Int32:
+                                            Console.WriteLine(value.AsInt32());
+                                            return;
+                                    }
                                 }
                             }
+
 
                             throw new NotImplementedException();
                         }
@@ -728,53 +756,54 @@ namespace HotReload
 
         private void InterpretReturn()
         {
-            /*
-            var returnType = _method.Signature.ReturnType;
-            if (returnType.IsVoid)
+            MethodSignature<SignatureTypeCode> signature = _method.DecodeSignature(SignatureTypeProvider.Instance, null);
+            var returnType = signature.ReturnType;
+            if (returnType == SignatureTypeCode.Void)
                 return;
 
             StackItem stackItem = PopWithValidation();
 
             again:
-            switch (returnType.Category)
+            switch (returnType)
             {
-                case TypeFlags.Boolean:
+                case SignatureTypeCode.Boolean:
                     SetReturnValue(stackItem.AsInt32() != 0);
                     break;
-                case TypeFlags.Char:
+                case SignatureTypeCode.Char:
                     SetReturnValue((char)stackItem.AsInt32());
                     break;
-                case TypeFlags.SByte:
-                case TypeFlags.Byte:
+                case SignatureTypeCode.SByte:
+                case SignatureTypeCode.Byte:
                     SetReturnValue((sbyte)stackItem.AsInt32());
                     break;
-                case TypeFlags.Int16:
-                case TypeFlags.UInt16:
+                case SignatureTypeCode.Int16:
+                case SignatureTypeCode.UInt16:
                     SetReturnValue((short)stackItem.AsInt32());
                     break;
-                case TypeFlags.Int32:
-                case TypeFlags.UInt32:
+                case SignatureTypeCode.Int32:
+                case SignatureTypeCode.UInt32:
                     SetReturnValue(stackItem.AsInt32());
                     break;
-                case TypeFlags.Int64:
-                case TypeFlags.UInt64:
+                case SignatureTypeCode.Int64:
+                case SignatureTypeCode.UInt64:
                     SetReturnValue(stackItem.AsInt64());
                     break;
-                case TypeFlags.IntPtr:
-                case TypeFlags.UIntPtr:
+                case SignatureTypeCode.IntPtr:
+                case SignatureTypeCode.UIntPtr:
                     SetReturnValue(stackItem.AsNativeInt());
                     break;
-                case TypeFlags.Single:
+                case SignatureTypeCode.Single:
                     SetReturnValue((float)stackItem.AsDouble());
                     break;
-                case TypeFlags.Double:
+                case SignatureTypeCode.Double:
                     SetReturnValue(stackItem.AsDouble());
                     break;
-                case TypeFlags.ValueType:
-                case TypeFlags.Nullable:
+                /*
+                case SignatureTypeCode.ValueType:
+                case SignatureTypeCode.Nullable:
                     SetReturnValue(stackItem.AsValueType());
                     break;
-                case TypeFlags.Enum:
+                case SignatureTypeCode.Enum:
                     returnType = returnType.UnderlyingType;
                     goto again;
                 case TypeFlags.Class:
@@ -783,10 +812,11 @@ namespace HotReload
                 case TypeFlags.SzArray:
                     SetReturnValue(stackItem.AsObjectRef());
                     break;
+                */
                 default:
                     // TODO: Support more complex return types
                     throw new NotImplementedException();
-            }*/
+            }
         }
 
         private void InterpretShiftOperation(ILOpcode opcode)
