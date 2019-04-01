@@ -659,72 +659,6 @@ namespace HotReload
 
             StackItem argument = GetArgument(index);
             _stack.Push(argument);
-
-            /*
-            TypeDesc argument = default(TypeDesc);
-
-            if (!_method.Signature.IsStatic)
-            {
-                if (index == 0)
-                    argument = _method.OwningType;
-                else
-                    argument = _method.Signature[index - 1];
-            }
-            else
-            {
-                argument = _method.Signature[index];
-            }
-
-            again:
-            switch (argument.Category)
-            {
-                case TypeFlags.Boolean:
-                    _stack.Push(StackItem.FromInt32(GetArgument<bool>(index) ? 1 : 0));
-                    break;
-                case TypeFlags.Char:
-                    _stack.Push(StackItem.FromInt32(GetArgument<char>(index)));
-                    break;
-                case TypeFlags.SByte:
-                case TypeFlags.Byte:
-                    _stack.Push(StackItem.FromInt32(GetArgument<byte>(index)));
-                    break;
-                case TypeFlags.Int16:
-                case TypeFlags.UInt16:
-                    _stack.Push(StackItem.FromInt32(GetArgument<short>(index)));
-                    break;
-                case TypeFlags.Int32:
-                case TypeFlags.UInt32:
-                    _stack.Push(StackItem.FromInt32(GetArgument<int>(index)));
-                    break;
-                case TypeFlags.Int64:
-                case TypeFlags.UInt64:
-                    _stack.Push(StackItem.FromInt64(GetArgument<long>(index)));
-                    break;
-                case TypeFlags.IntPtr:
-                case TypeFlags.UIntPtr:
-                    _stack.Push(StackItem.FromNativeInt(GetArgument<IntPtr>(index)));
-                    break;
-                case TypeFlags.Single:
-                case TypeFlags.Double:
-                    _stack.Push(StackItem.FromDouble(GetArgument<double>(index)));
-                    break;
-                case TypeFlags.ValueType:
-                case TypeFlags.Nullable:
-                    _stack.Push(StackItem.FromValueType(GetArgument<ValueType>(index)));
-                    break;
-                case TypeFlags.Enum:
-                    argument = argument.UnderlyingType;
-                    goto again;
-                case TypeFlags.Class:
-                case TypeFlags.Interface:
-                case TypeFlags.Array:
-                case TypeFlags.SzArray:
-                    _stack.Push(StackItem.FromObjectRef(GetArgument<object>(index)));
-                    break;
-                default:
-                    // TODO: Support more complex return types
-                    throw new NotImplementedException();
-            }*/
         }
 
         private void InterpretStoreArgument(int index)
@@ -733,36 +667,6 @@ namespace HotReload
 
             StackItem stackItem = PopWithValidation();
             SetArgument(index, stackItem);
-
-            /*
-            StackItem stackItem = PopWithValidation();
-            switch (stackItem.Kind)
-            {
-                case StackValueKind.Int32:
-                    SetArgument(index, stackItem.AsInt32());
-                    break;
-                case StackValueKind.Int64:
-                    SetArgument(index, stackItem.AsInt64());
-                    break;
-                case StackValueKind.NativeInt:
-                    SetArgument(index, stackItem.AsNativeInt());
-                    break;
-                case StackValueKind.Float:
-                    SetArgument(index, stackItem.AsDouble());
-                    break;
-                case StackValueKind.ByRef:
-                    // TODO: Add support for ByRef
-                    throw new NotImplementedException();
-                case StackValueKind.ObjRef:
-                    SetArgument(index, stackItem.AsObjectRef());
-                    break;
-                case StackValueKind.ValueType:
-                    SetArgument(index, stackItem.AsValueType());
-                    break;
-                default:
-                    ThrowHelper.ThrowInvalidProgramException();
-                    break;
-            }*/
         }
 
         private void InterpretReturn()
@@ -774,62 +678,6 @@ namespace HotReload
 
             StackItem stackItem = PopWithValidation();
             SetReturnValue(stackItem);
-
-            /*
-            again:
-            switch (returnType)
-            {
-                case SignatureTypeCode.Boolean:
-                    SetReturnValue(stackItem.AsInt32() != 0);
-                    break;
-                case SignatureTypeCode.Char:
-                    SetReturnValue((char)stackItem.AsInt32());
-                    break;
-                case SignatureTypeCode.SByte:
-                case SignatureTypeCode.Byte:
-                    SetReturnValue((sbyte)stackItem.AsInt32());
-                    break;
-                case SignatureTypeCode.Int16:
-                case SignatureTypeCode.UInt16:
-                    SetReturnValue((short)stackItem.AsInt32());
-                    break;
-                case SignatureTypeCode.Int32:
-                case SignatureTypeCode.UInt32:
-                    SetReturnValue(stackItem.AsInt32());
-                    break;
-                case SignatureTypeCode.Int64:
-                case SignatureTypeCode.UInt64:
-                    SetReturnValue(stackItem.AsInt64());
-                    break;
-                case SignatureTypeCode.IntPtr:
-                case SignatureTypeCode.UIntPtr:
-                    SetReturnValue(stackItem.AsNativeInt());
-                    break;
-                case SignatureTypeCode.Single:
-                    SetReturnValue((float)stackItem.AsDouble());
-                    break;
-                case SignatureTypeCode.Double:
-                    SetReturnValue(stackItem.AsDouble());
-                    break;
-                /*
-                case SignatureTypeCode.ValueType:
-                case SignatureTypeCode.Nullable:
-                    SetReturnValue(stackItem.AsValueType());
-                    break;
-                case SignatureTypeCode.Enum:
-                    returnType = returnType.UnderlyingType;
-                    goto again;
-                case TypeFlags.Class:
-                case TypeFlags.Interface:
-                case TypeFlags.Array:
-                case TypeFlags.SzArray:
-                    SetReturnValue(stackItem.AsObjectRef());
-                    break;
-                * /
-                default:
-                    // TODO: Support more complex return types
-                    throw new NotImplementedException();
-            }*/
         }
 
         private void InterpretShiftOperation(ILOpcode opcode)
@@ -2220,44 +2068,7 @@ namespace HotReload
             }
 
             Debug.Assert(length >= 0);
-            _stack.Push(StackItem.FromObjectRef(new object[length]));
-
-            /*
-            TODO
-            // See https://github.com/dotnet/corefx/blob/775347f642ae10badf82bcd0352c9f316093cd6f/src/System.Reflection.MetadataLoadContext/src/System/Reflection/TypeLoading/General/Ecma/EcmaResolver.cs#L59
-            // Seems to be TypeReference if external to currently assembly, otherwise TypeDefinition
-            Handle handle = token.AsHandle();
-            if (handle.Kind != HandleKind.TypeReference)
-            {
-                ThrowHelper.ThrowInvalidProgramException();
-            }
-
-            TypeReference typeReference = _reader.GetTypeReference((TypeReferenceHandle)handle);
-            EntityHandle scope = typeReference.ResolutionScope;
-
-            HandleKind scopeKind = scope.Kind;
-            switch (scopeKind)
-            {
-                case HandleKind.AssemblyReference:
-                    {
-                        var assemblyReferenceHandle = (AssemblyReferenceHandle)scope;
-                        var assemblyReference = _reader.GetAssemblyReference(assemblyReferenceHandle);
-                    }
-                    break;
-
-                default:
-                    throw new NotImplementedException();
-            }*/
-
-            /*
-            Original:
-
-            TypeDesc arrayType = ((TypeDesc)_methodIL.GetObject(token)).MakeArrayType();
-
-            // TODO: Add support for arbitrary  non-primitive types
-            Array array = RuntimeAugments.NewArray(arrayType.GetRuntimeTypeHandle(), length);
-
-            _stack.Push(StackItem.FromObjectRef(array));*/
+            _stack.Push(StackItem.FromObjectRef(new StackItem[length]));
         }
 
         private void InterpretLoadLength()
@@ -2270,7 +2081,7 @@ namespace HotReload
         {
             StackItem valueItem = PopWithValidation();
             StackItem indexItem = PopWithValidation();
-            Array array = (Array)PopWithValidation().AsObjectRef();
+            StackItem[] array = (StackItem[])PopWithValidation().AsObjectRef();
 
             int index = 0;
             switch (indexItem.Kind)
@@ -2291,71 +2102,8 @@ namespace HotReload
                     break;
             }
 
-            switch (opcode)
-            {
-                case ILOpcode.stelem_i:
-                    array.SetValue(valueItem.AsNativeInt(), index);
-                    break;
-                case ILOpcode.stelem_i1:
-                    array.SetValue((sbyte)valueItem.AsInt32(), index);
-                    break;
-                case ILOpcode.stelem_i2:
-                    array.SetValue((short)valueItem.AsInt32(), index);
-                    break;
-                case ILOpcode.stelem_i4:
-                    array.SetValue(valueItem.AsInt32(), index);
-                    break;
-                case ILOpcode.stelem_i8:
-                    array.SetValue(valueItem.AsInt64(), index);
-                    break;
-                case ILOpcode.stelem_r4:
-                    array.SetValue((float)valueItem.AsDouble(), index);
-                    break;
-                case ILOpcode.stelem_r8:
-                    array.SetValue(valueItem.AsDouble(), index);
-                    break;
-                case ILOpcode.stelem_ref:
-                    array.SetValue(valueItem.AsObjectRef(), index);
-                    break;
-                default:
-                    Debug.Assert(false);
-                    break;
-            }
-
-            // TODO
-            /*
-            ref byte address = ref RuntimeAugments.GetSzArrayElementAddress(array, index);
-
-            switch (opcode)
-            {
-                case ILOpcode.stelem_i:
-                    Unsafe.Write(ref address, valueItem.AsNativeInt());
-                    break;
-                case ILOpcode.stelem_i1:
-                    Unsafe.Write(ref address, (sbyte)valueItem.AsInt32());
-                    break;
-                case ILOpcode.stelem_i2:
-                    Unsafe.Write(ref address, (short)valueItem.AsInt32());
-                    break;
-                case ILOpcode.stelem_i4:
-                    Unsafe.Write(ref address, valueItem.AsInt32());
-                    break;
-                case ILOpcode.stelem_i8:
-                    Unsafe.Write(ref address, valueItem.AsInt64());
-                    break;
-                case ILOpcode.stelem_r4:
-                    Unsafe.Write(ref address, (float)valueItem.AsDouble());
-                    break;
-                case ILOpcode.stelem_r8:
-                    Unsafe.Write(ref address, valueItem.AsDouble());
-                    break;
-                case ILOpcode.stelem_ref:
-                    Unsafe.As<Object[]>(array)[index] = valueItem.AsObjectRef();
-                    break;
-                default:
-                    Debug.Assert(false);
-                    break;
-            }*/
+            // TODO: Check type of valueItem is correct;
+            array[index] = valueItem;
         }
 
         private void InterpretStoreElement(int token)
@@ -2450,7 +2198,7 @@ namespace HotReload
         private void InterpretLoadElement(ILOpcode opcode)
         {
             StackItem indexItem = PopWithValidation();
-            Array array = (Array)PopWithValidation().AsObjectRef();
+            StackItem[] array = (StackItem[])PopWithValidation().AsObjectRef();
 
             int index = 0;
             switch (indexItem.Kind)
@@ -2471,6 +2219,11 @@ namespace HotReload
                     break;
             }
 
+            StackItem valueItem = array[index];
+            _stack.Push(valueItem);
+
+            // TODO: Check that the valueItem's type is correct
+            /*
             switch (opcode)
             {
                 case ILOpcode.ldelem_i1:
@@ -2509,7 +2262,7 @@ namespace HotReload
                 default:
                     Debug.Assert(false);
                     break;
-            }
+            }*/
         }
 
         private void InterpretLoadElement(int token)

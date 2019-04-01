@@ -59,7 +59,8 @@ namespace HotReload
 
         public SignatureTypeCode GetSZArrayType(SignatureTypeCode elementType)
         {
-            throw new System.NotImplementedException();
+            // TODO: Return the type of the array?
+            return elementType;
         }
 
         public SignatureTypeCode GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind)
