@@ -45,20 +45,16 @@ namespace HotReload
                 case TypeCode.SByte:
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
-
-                    StackItem.FromInt32((int)value);
-                    break;
+                    return StackItem.FromInt32((int)value);
                 case TypeCode.DateTime:
                     break;
                 case TypeCode.Decimal:
                 case TypeCode.Double:
                 case TypeCode.Single:
-                    StackItem.FromDouble((double)value);
-                    break;
+                    return StackItem.FromDouble((double)value);
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
-                    StackItem.FromInt64((long)value);
-                    break;
+                    return StackItem.FromInt64((long)value);
                 case TypeCode.Empty:
                 case TypeCode.Object:
                 case TypeCode.String:

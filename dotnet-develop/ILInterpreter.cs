@@ -254,8 +254,10 @@ namespace HotReload
                                     _stack.Push(result.ToStackItem(signature.ReturnType));
                                 }
                             }
-
-                            throw new NotImplementedException();
+                            else
+                            {
+                                throw new NotImplementedException();
+                            }
                         }
                         break;
                     case ILOpcode.calli:
