@@ -27,7 +27,8 @@ namespace HotReload
 
         private readonly StackItem[] _locals;
 
-        private CallInterceptorArgs _callInterceptorArgs;
+        // The first slot is the return value.
+        private StackItem[] _argumentsAndReturnValue;
 
         public LowLevelStack<StackItem> EvaluationStack => _stack;
 
@@ -47,19 +48,19 @@ namespace HotReload
             _stack = new LowLevelStack<StackItem>();
         }
 
-        public void SetReturnValue<T>(T value)
+        public void SetReturnValue(StackItem value)
         {
-            _callInterceptorArgs.ArgumentsAndReturnValue.SetVar<T>(0, value);
+            _argumentsAndReturnValue[0] = value;
         }
 
-        public T GetArgument<T>(int index)
+        public StackItem GetArgument(int index)
         {
-            return _callInterceptorArgs.ArgumentsAndReturnValue.GetVar<T>(index + 1);
+            return _argumentsAndReturnValue[index + 1];
         }
 
-        public void SetArgument<T>(int index, T value)
+        public void SetArgument(int index, StackItem value)
         {
-            _callInterceptorArgs.ArgumentsAndReturnValue.SetVar<T>(index + 1, value);
+            _argumentsAndReturnValue[index + 1] = value;
         }
 
         public StackItem PopWithValidation()
@@ -84,9 +85,9 @@ namespace HotReload
             return stackItem;
         }
 
-        public void InterpretMethod(ref CallInterceptorArgs callInterceptorArgs)
+        public void InterpretMethod(ref StackItem[] argumentsAndReturnValue)
         {
-            _callInterceptorArgs = callInterceptorArgs;
+            _argumentsAndReturnValue = argumentsAndReturnValue;
             ILReader reader = new ILReader(_methodBody.GetILBytes());
 
             while (reader.HasNext)
@@ -187,16 +188,20 @@ namespace HotReload
                                 MethodBodyBlock methodBody = _target.GetMethodBody(methodDefinition.RelativeVirtualAddress);
                                 MethodSignature<SignatureTypeCode> signature = methodDefinition.DecodeSignature(SignatureTypeProvider.Instance, null);
 
-                                // TODO: Create CallInterceptorArgs with proper variable set size.
                                 var interpreter = new ILInterpreter(_target, _reader, methodDefinition, methodBody);
-                                var callInterceptorArgs2 = default(CallInterceptorArgs);
 
-                                interpreter.InterpretMethod(ref callInterceptorArgs2);
+                                var arguments = new StackItem[signature.ParameterTypes.Length + 1];
+                                for (var i = 0; i < signature.ParameterTypes.Length; i++)
+                                {
+                                    StackItem argument = PopWithValidation();
+                                    arguments[signature.ParameterTypes.Length - i] = argument;
+                                }
+
+                                interpreter.InterpretMethod(ref arguments);
 
                                 if (signature.ReturnType != SignatureTypeCode.Void)
                                 {
-                                    // TODO: put return value (if any) on stack.
-                                    _stack.Push(interpreter.GetArgument<StackItem>(0));
+                                    _stack.Push(arguments[0]);
                                 }
 
                                 break;
@@ -218,7 +223,6 @@ namespace HotReload
                                     }
                                 }
                             }
-
 
                             throw new NotImplementedException();
                         }
@@ -653,6 +657,9 @@ namespace HotReload
         {
             Debug.Assert(index >= 0);
 
+            StackItem argument = GetArgument(index);
+            _stack.Push(argument);
+
             /*
             TypeDesc argument = default(TypeDesc);
 
@@ -725,6 +732,10 @@ namespace HotReload
             Debug.Assert(index >= 0);
 
             StackItem stackItem = PopWithValidation();
+            SetArgument(index, stackItem);
+
+            /*
+            StackItem stackItem = PopWithValidation();
             switch (stackItem.Kind)
             {
                 case StackValueKind.Int32:
@@ -751,7 +762,7 @@ namespace HotReload
                 default:
                     ThrowHelper.ThrowInvalidProgramException();
                     break;
-            }
+            }*/
         }
 
         private void InterpretReturn()
@@ -762,7 +773,9 @@ namespace HotReload
                 return;
 
             StackItem stackItem = PopWithValidation();
+            SetReturnValue(stackItem);
 
+            /*
             again:
             switch (returnType)
             {
@@ -812,11 +825,11 @@ namespace HotReload
                 case TypeFlags.SzArray:
                     SetReturnValue(stackItem.AsObjectRef());
                     break;
-                */
+                * /
                 default:
                     // TODO: Support more complex return types
                     throw new NotImplementedException();
-            }
+            }*/
         }
 
         private void InterpretShiftOperation(ILOpcode opcode)

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using Internal.Runtime.Interpreter;
 using Internal.TypeSystem;
 
 namespace HotReload
@@ -25,10 +26,11 @@ namespace HotReload
                 var entryPoint = metadataReader.GetMethodDefinition((MethodDefinitionHandle)handle);
                 var entryPointBody = reader.GetMethodBody(entryPoint.RelativeVirtualAddress);
 
+                // TODO: Pass CLI arguments down to entry point.
                 var interpreter = new ILInterpreter(reader, metadataReader, entryPoint, entryPointBody);
-                var callInterceptorArgs = default(CallInterceptorArgs);
+                var arguments = new StackItem[0];
 
-                interpreter.InterpretMethod(ref callInterceptorArgs);
+                interpreter.InterpretMethod(ref arguments);
             }
         }
     }
