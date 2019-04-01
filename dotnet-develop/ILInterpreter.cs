@@ -7,8 +7,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Runtime.Loader;
 using Internal.IL;
 using Internal.Runtime.CompilerServices;
 using Internal.Runtime.Interpreter;
@@ -186,7 +188,7 @@ namespace HotReload
                             {
                                 MethodDefinition methodDefinition = _reader.GetMethodDefinition((MethodDefinitionHandle)handle);
                                 MethodBodyBlock methodBody = _target.GetMethodBody(methodDefinition.RelativeVirtualAddress);
-                                MethodSignature<SignatureTypeCode> signature = methodDefinition.DecodeSignature(SignatureTypeProvider.Instance, null);
+                                MethodSignature<SignatureTypeCode> signature = methodDefinition.DecodeSignature(SignatureTypeCodeProvider.Instance, null);
 
                                 var interpreter = new ILInterpreter(_target, _reader, methodDefinition, methodBody);
 
@@ -209,18 +211,47 @@ namespace HotReload
                             else if (handle.Kind == HandleKind.MemberReference)
                             {
                                 MemberReference memberReference = _reader.GetMemberReference((MemberReferenceHandle)handle);
-                                if (_reader.GetString(memberReference.Name) == "WriteLine")
+                                MethodSignature<Type> signature = memberReference.DecodeMethodSignature(SignatureTypeProvider.Instance, null);
+                                if (signature.Header.IsInstance)
                                 {
-                                    StackItem value = _stack.Pop();
-                                    switch (value.Kind)
-                                    {
-                                        case StackValueKind.ObjRef:
-                                            Console.WriteLine(value.AsObjectRef());
-                                            return;
-                                        case StackValueKind.Int32:
-                                            Console.WriteLine(value.AsInt32());
-                                            return;
-                                    }
+                                    throw new NotImplementedException();
+                                }
+
+                                TypeReference typeReference = _reader.GetTypeReference((TypeReferenceHandle)memberReference.Parent);
+                                if (typeReference.ResolutionScope.Kind != HandleKind.AssemblyReference)
+                                {
+                                    throw new NotImplementedException();
+                                }
+
+                                AssemblyReference assemblyReference = _reader.GetAssemblyReference((AssemblyReferenceHandle)typeReference.ResolutionScope);
+                                AssemblyName assemblyName = assemblyReference.GetAssemblyName();
+                                Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+
+                                string typeName = _reader.GetString(typeReference.Name);
+                                string typeNamespace = _reader.GetString(typeReference.Namespace);
+                                string fullyQualifiedTypeName = $"{typeNamespace}.{typeName}";
+
+                                Type type = assembly.GetType(fullyQualifiedTypeName);
+                                string memberName = _reader.GetString(memberReference.Name);
+
+                                MethodInfo method = type.GetMethod(
+                                    memberName,
+                                    signature.ParameterTypes.ToBuilder().ToArray());
+
+                                object[] parameters = new object[signature.ParameterTypes.Length];
+                                for (int i = 0; i < signature.ParameterTypes.Length; i++)
+                                {
+                                    StackItem valueItem = PopWithValidation();
+                                    object value = valueItem.ToObject();
+
+                                    parameters[signature.ParameterTypes.Length - i - 1] = value;
+                                }
+
+                                var result = method.Invoke(null, parameters);
+
+                                if (signature.ReturnType != typeof(void))
+                                {
+                                    _stack.Push(result.ToStackItem(signature.ReturnType));
                                 }
                             }
 
@@ -671,7 +702,7 @@ namespace HotReload
 
         private void InterpretReturn()
         {
-            MethodSignature<SignatureTypeCode> signature = _method.DecodeSignature(SignatureTypeProvider.Instance, null);
+            MethodSignature<SignatureTypeCode> signature = _method.DecodeSignature(SignatureTypeCodeProvider.Instance, null);
             var returnType = signature.ReturnType;
             if (returnType == SignatureTypeCode.Void)
                 return;

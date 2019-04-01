@@ -6,6 +6,8 @@
     <RootNamespace>HotReload</RootNamespace>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
