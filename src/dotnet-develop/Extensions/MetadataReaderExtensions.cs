@@ -2,7 +2,7 @@ using System;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 
-namespace HotReload
+namespace DotnetDevelop
 {
     internal static class MetadataReaderExtensions
     {

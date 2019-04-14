@@ -1,4 +1,4 @@
-namespace HotReload
+namespace DotnetDevelop
 {
     // https://github.com/dotnet/corert/blob/123e8740d58d7660313efe6f3500ab082248440d/src/System.Private.TypeLoader/src/Internal/Runtime/TypeLoader/CallInterceptor.cs#L321
     public struct CallInterceptorArgs

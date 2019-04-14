@@ -4,7 +4,7 @@ using System.Reflection.PortableExecutable;
 using Internal.Runtime.Interpreter;
 using Internal.TypeSystem;
 
-namespace HotReload
+namespace DotnetDevelop
 {
     public class Interpreter
     {

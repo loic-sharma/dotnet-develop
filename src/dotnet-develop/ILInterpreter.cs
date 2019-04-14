@@ -12,11 +12,10 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.Loader;
 using Internal.IL;
-using Internal.Runtime.CompilerServices;
 using Internal.Runtime.Interpreter;
 using Internal.TypeSystem;
 
-namespace HotReload
+namespace DotnetDevelop
 {
     internal unsafe class ILInterpreter
     {

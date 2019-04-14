@@ -3,7 +3,7 @@ using System.Reflection.Metadata;
 using Internal.IL;
 using Internal.Runtime.Interpreter;
 
-namespace HotReload
+namespace DotnetDevelop
 {
     internal static class StackItemExtensions
     {

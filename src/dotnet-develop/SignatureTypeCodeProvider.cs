@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
 
-namespace HotReload
+namespace DotnetDevelop
 {
     public class SignatureTypeCodeProvider : ISignatureTypeProvider<SignatureTypeCode, object>
     {
