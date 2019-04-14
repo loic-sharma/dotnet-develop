@@ -6,11 +6,11 @@ using Internal.TypeSystem;
 
 namespace HotReload
 {
-    public class Program
+    public class Interpreter
     {
-        public static void Main(string[] args)
+        public void InterpretDll(string path)
         {
-            using (var stream = File.OpenRead(@"D:\Code\dotnet-develop\samples\HelloWorld\bin\Debug\netcoreapp2.2\HelloWorld.dll"))
+            using (var stream = File.OpenRead(path))
             using (var reader = new PEReader(stream))
             {
                 var metadataReader = reader.GetMetadataReader();
