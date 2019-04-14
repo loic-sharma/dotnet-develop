@@ -1,16 +1,35 @@
+using System;
+using System.Linq;
+
 namespace HotReload
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            var path = @"D:\Code\dotnet-develop\tests\samples\HelloWorld\bin\Debug\netcoreapp2.2\HelloWorld.dll";
-            if (args.Length > 0)
+            if (args.Length < 1)
             {
-                path = args[args.Length - 1];
+                Console.Error.WriteLine("Please provide a path to a DLL");
+                return;
             }
 
-            new Interpreter().InterpretDll(path);
+            var path = args[0];
+            var dllArgs = ParseDllArgs(args);
+
+            new Interpreter().InterpretDll(path, dllArgs);
+        }
+
+        private static string[] ParseDllArgs(string[] args)
+        {
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (args[i].Trim() == "--")
+                {
+                    return args.Skip(i + 1).ToArray();
+                }
+            }
+
+            return new string[0];
         }
     }
 }

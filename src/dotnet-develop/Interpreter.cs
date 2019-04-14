@@ -8,7 +8,7 @@ namespace HotReload
 {
     public class Interpreter
     {
-        public void InterpretDll(string path)
+        public void InterpretDll(string path, string[] args)
         {
             using (var stream = File.OpenRead(path))
             using (var reader = new PEReader(stream))
@@ -26,12 +26,34 @@ namespace HotReload
                 var entryPoint = metadataReader.GetMethodDefinition((MethodDefinitionHandle)handle);
                 var entryPointBody = reader.GetMethodBody(entryPoint.RelativeVirtualAddress);
 
-                // TODO: Pass CLI arguments down to entry point.
-                var interpreter = new ILInterpreter(reader, metadataReader, entryPoint, entryPointBody);
-                var arguments = new StackItem[0];
+                var arguments = PrepareEntryPointArguments(entryPoint, args);
 
+                var interpreter = new ILInterpreter(reader, metadataReader, entryPoint, entryPointBody);
                 interpreter.InterpretMethod(ref arguments);
             }
+        }
+
+        private StackItem[] PrepareEntryPointArguments(MethodDefinition entryPoint, string[] args)
+        {
+            var signature = entryPoint.DecodeSignature(SignatureTypeCodeProvider.Instance, null);
+            if (signature.ParameterTypes.Length > 1)
+            {
+                ThrowHelper.ThrowInvalidProgramException();
+            }
+
+            // The first argument is the return value
+            var arguments = new StackItem[signature.ParameterTypes.Length + 1];
+            if (signature.ParameterTypes.Length == 1)
+            {
+                //if (signature.ParameterTypes[0] != SignatureTypeCode.Array)
+                //{
+                //    ThrowHelper.ThrowInvalidProgramException();
+                //}
+
+                arguments[1] = StackItem.FromObjectRef(args);
+            }
+
+            return arguments;
         }
     }
 }

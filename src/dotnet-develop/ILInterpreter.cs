@@ -192,6 +192,7 @@ namespace HotReload
 
                                 var interpreter = new ILInterpreter(_target, _reader, methodDefinition, methodBody);
 
+                                // The first argument is the return value.
                                 var arguments = new StackItem[signature.ParameterTypes.Length + 1];
                                 for (var i = 0; i < signature.ParameterTypes.Length; i++)
                                 {
