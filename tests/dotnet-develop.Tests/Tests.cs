@@ -1,11 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Xunit;
 
 namespace dotnet_develop.Tests
 {
-    // TODO: Fix path in "Run"
     // TODO: Place expected output on samples themselves as comments. Use roslyn to parse expected output.
     public class Tests
     {
@@ -50,18 +50,22 @@ namespace dotnet_develop.Tests
 
         private static string Run(string name)
         {
-            var path = $@"D:\Code\dotnet-develop\tests\samples\{name}\bin\Debug\netcoreapp2.2\{name}.dll";
-            if (!File.Exists(path))
+            var testAssemblyPath = Assembly.GetExecutingAssembly().Location;
+            var samplesPath = Path.GetFullPath(Path.Combine(testAssemblyPath, "..", "..", "..", "..", "..", "samples"));
+            var toolPath = Path.GetFullPath(Path.Combine(testAssemblyPath, "..", "..", "..", "..", "..", "..", "src", "dotnet-develop"));
+
+            var dllPath = Path.Combine(samplesPath, name, "bin", "Debug", "netcoreapp2.2", $"{name}.dll");
+            if (!File.Exists(dllPath))
             {
-                throw new Exception($"Dll '{path}' could not be found, try building the solution");
+                throw new Exception($"Dll '{dllPath}' could not be found, try building the solution");
             }
 
             string output;
             using (var process = new Process())
             {
-                process.StartInfo.WorkingDirectory = @"D:\Code\dotnet-develop\src\dotnet-develop";
+                process.StartInfo.WorkingDirectory = toolPath;
                 process.StartInfo.FileName = @"C:\Program Files\dotnet\dotnet.exe";
-                process.StartInfo.Arguments = $"run -- {path}";
+                process.StartInfo.Arguments = $"run -- {dllPath}";
 
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
