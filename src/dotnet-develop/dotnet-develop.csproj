@@ -9,8 +9,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>DotnetDevelop</RootNamespace>
 
-    <Description>A .NET interpreter written in C#</Description>
-    <Version>0.0.0</Version>
+    <PackageDescription>A .NET interpreter</PackageDescription>
+    <PackageIconUrl>https://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageVersion>0.0.1-prerelease</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
