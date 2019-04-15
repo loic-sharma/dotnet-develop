@@ -82,6 +82,8 @@ namespace dotnet_develop.Tests
                 throw new Exception($"Dll '{dllPath}' could not be found, try building the solution");
             }
 
+            //DotnetDevelop.Program.Main(new string[] { dllPath });
+
             string output;
             using (var process = new Process())
             {
