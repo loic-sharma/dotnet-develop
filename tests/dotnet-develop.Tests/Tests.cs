@@ -6,7 +6,7 @@ using Xunit;
 
 namespace dotnet_develop.Tests
 {
-    // TODO: Place expected output on samples themselves as comments. Use roslyn to parse expected output.
+    // TODO: Place expected output on samples themselves as comments. Use Roslyn to parse expected output.
     public class Tests
     {
         [Fact]
@@ -44,6 +44,28 @@ namespace dotnet_develop.Tests
                 "1",
                 "0",
                 "1");
+
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void Arrays()
+        {
+            var result = Run("Arrays");
+            var expected = ExpectedOutput(
+                "1",
+                "2");
+
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void Methods()
+        {
+            var result = Run("Methods");
+            var expected = ExpectedOutput(
+                "123",
+                "456");
 
             Assert.Equal(expected, result);
         }
