@@ -12,6 +12,7 @@ namespace Arrays
 
             Console.WriteLine(a[0]);
             Console.WriteLine(a[1]);
+            Console.WriteLine(a.Length);
 
             // TODO: This generates a static field and calls RuntimeHelpers::InitializeArray
             //var b = new int[] { 1, 2, 3, 4, 5 };

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using Internal.Runtime.Interpreter;
@@ -50,7 +51,9 @@ namespace DotnetDevelop
                 //    ThrowHelper.ThrowInvalidProgramException();
                 //}
 
-                arguments[1] = StackItem.FromObjectRef(args);
+
+                var argumentItems = args.Select(a => StackItem.FromObjectRef(a)).ToArray();
+                arguments[1] = StackItem.FromObjectRef(argumentItems);
             }
 
             return arguments;

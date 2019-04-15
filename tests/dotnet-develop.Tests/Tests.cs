@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -14,6 +15,17 @@ namespace dotnet_develop.Tests
         {
             var result = Run("HelloWorld");
             var expected = ExpectedOutput("Hello world");
+
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void EntryPoint()
+        {
+            var result = Run("EntryPoint", "arg1", "arg2");
+            var expected = ExpectedOutput(
+                "arg1",
+                "arg2");
 
             Assert.Equal(expected, result);
         }
@@ -54,6 +66,7 @@ namespace dotnet_develop.Tests
             var result = Run("Arrays");
             var expected = ExpectedOutput(
                 "1",
+                "2",
                 "2");
 
             Assert.Equal(expected, result);
@@ -70,7 +83,7 @@ namespace dotnet_develop.Tests
             Assert.Equal(expected, result);
         }
 
-        private static string Run(string name)
+        private static string Run(string name, params string[] args)
         {
             var testAssemblyPath = Assembly.GetExecutingAssembly().Location;
             var samplesPath = Path.GetFullPath(Path.Combine(testAssemblyPath, "..", "..", "..", "..", "..", "samples"));
@@ -82,14 +95,22 @@ namespace dotnet_develop.Tests
                 throw new Exception($"Dll '{dllPath}' could not be found, try building the solution");
             }
 
-            //DotnetDevelop.Program.Main(new string[] { dllPath });
+            //DotnetDevelop.Program.Main((args.Length == 0)
+            //    ? new string[] { dllPath }
+            //    : new[] { dllPath }.Concat(new[] { "--" }).Concat(args).ToArray());
+
+            var argsString = string.Empty;
+            if (args.Length > 0)
+            {
+                argsString = " -- " + string.Join(" ", args);
+            }
 
             string output;
             using (var process = new Process())
             {
                 process.StartInfo.WorkingDirectory = toolPath;
                 process.StartInfo.FileName = @"C:\Program Files\dotnet\dotnet.exe";
-                process.StartInfo.Arguments = $"run -- {dllPath}";
+                process.StartInfo.Arguments = $"run -- {dllPath}{argsString}";
 
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
